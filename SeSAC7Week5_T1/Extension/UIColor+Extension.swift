@@ -1,27 +1,23 @@
 import UIKit
 
 extension UIColor {
-    init(hex: String, alpha: Double = 1.0) {
-        var hexValue = hex.trimmingCharacters(in: .whitespacesAndNewlines).uppercased()
-        if hexValue.hasPrefix("#") {
-            hexValue.remove(at: hexValue.startIndex)
-        } else if hexValue.hasPrefix("0x") {
-            hexValue.removeSubrange(hexValue.startIndex..<hexValue.index(hexValue.startIndex, offsetBy: 2))
+    convenience init(hexCode: String, alpha: CGFloat = 1.0) {
+        var hexFormatted: String = hexCode.trimmingCharacters(in: CharacterSet.whitespacesAndNewlines).uppercased()
+        
+        if hexFormatted.hasPrefix("#") {
+            hexFormatted = String(hexFormatted.dropFirst())
+        } else if hexFormatted.hasPrefix("0x") {
+            hexFormatted.removeSubrange(hexFormatted.startIndex..<hexFormatted.index(hexFormatted.startIndex, offsetBy: 2))
         }
         
-        var rgb: UInt64 = 0
-        Scanner(string: hexValue).scanHexInt64(&rgb)
+        assert(hexFormatted.count == 6, "Invalid hex code used.")
         
-        let red = Double((rgb >> 16) & 0xFF) / 255.0
-        let green = Double((rgb >> 8) & 0xFF) / 255.0
-        let blue = Double(rgb & 0xFF) / 255.0
+        var rgbValue: UInt64 = 0
+        Scanner(string: hexFormatted).scanHexInt64(&rgbValue)
         
-        self.init(
-            .sRGB,
-            red: red,
-            green: green,
-            blue: blue,
-            opacity: alpha
-        )
+        self.init(red: CGFloat((rgbValue & 0xFF0000) >> 16) / 255.0,
+                  green: CGFloat((rgbValue & 0x00FF00) >> 8) / 255.0,
+                  blue: CGFloat(rgbValue & 0x0000FF) / 255.0,
+                  alpha: alpha)
     }
 }

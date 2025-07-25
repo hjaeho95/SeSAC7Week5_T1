@@ -14,4 +14,14 @@ extension String {
         
         return outerDateString
     }
+    
+    func toDecimalStyle() -> String {
+        let formatter = NumberFormatter()
+        formatter.numberStyle = .decimal
+        guard let decimal = formatter.string(for: Int(self)) else {
+            print("DecimalStyle 변환 실패")
+            return ""
+        }
+        return decimal
+    }
 }
