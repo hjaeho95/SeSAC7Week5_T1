@@ -118,7 +118,7 @@ class ShopItemsViewController: UIViewController {
         
         let itemWidth = deviceWidth - (edgePadding * 2) - (itemSpacing * (itemRowCount - 1))
         
-        layout.itemSize = CGSize(width: itemWidth / itemRowCount, height: 240)
+        layout.itemSize = CGSize(width: itemWidth / itemRowCount, height: (itemWidth / itemRowCount) + 50)
         layout.sectionInset = .init(top: edgePadding, left: edgePadding, bottom: edgePadding, right: edgePadding)
         layout.minimumLineSpacing = itemSpacing
         layout.minimumInteritemSpacing = itemSpacing
