@@ -33,12 +33,17 @@ class ShopViewController: UIViewController {
     }
     
     // MARK: - Component
-    private let searchBar = {
+    private lazy var searchBar = {
         let searchBar = UISearchBar()
-//        searchBar.searchTextField.attributedPlaceholder = NSMutableAttributedString(string: "브랜드, 상품, 프로필, 태그 등", attributes: [
-//            .foregroundColor: UIColor.systemGray6.cgColor,
-//        ])
-//        searchBar.barTintColor = .black
+        searchBar.searchTextField.textColor = .white
+        searchBar.searchTextField.attributedPlaceholder = NSMutableAttributedString(string: "브랜드, 상품, 프로필, 태그 등", attributes: [
+            .foregroundColor: UIColor.systemGray.cgColor,
+        ])
+        searchBar.searchTextField.leftView?.tintColor = .systemGray
+        
+        searchBar.barTintColor = .clear
+        
+        searchBar.delegate = self
         return searchBar
     }()
     
@@ -64,6 +69,7 @@ class ShopViewController: UIViewController {
         configureLayout()
         initUI()
         configure()
+        callRequest()
     }
     
     // MARK: - Method
@@ -72,7 +78,7 @@ class ShopViewController: UIViewController {
             "X-Naver-Client-Id": "HoBtSpz61437_fassXHE",
             "X-Naver-Client-Secret": "uhRjQxAq8s"
         ])
-        let url = "https://openapi.naver.com/v1/search/shop.json?query=\(query)&display=100"
+        let url = "https://openapi.naver.com/v1/search/shop.json?query=\(query)&display=\(ShopItemPrefetchConfig.display.rawValue)"
         AF.request(url, method: .get, headers: headers)
             .responseDecodable(of: Shop.self) { response in
                 switch response.result {
@@ -137,12 +143,14 @@ extension ShopViewController: SeSACViewControllerProtocol {
     
     private func initViewUI() {
         view.backgroundColor = .black
+        navigationItem.title = "영캠러의 쇼핑쇼핑"
+        navigationController?.navigationBar.titleTextAttributes = [.foregroundColor: UIColor.white]
         navigationItem.backButtonTitle = ""
     }
     
     // MARK: - Configure
     func configure() {
-        searchBar.delegate = self
+        
     }
 }
 

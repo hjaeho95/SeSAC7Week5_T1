@@ -31,3 +31,16 @@ struct ShopItem: Decodable {
     let category3: String
     let category4: String
 }
+
+enum ShopItemSort: String {
+    case sim = "sim"
+    case date = "date"
+    case dsc = "dsc"
+    case asc = "asc"
+}
+
+enum ShopItemPrefetchConfig: Int {
+    case display = 100
+    case preloadThreshold = 30
+    case maxItemCount = 1000
+}

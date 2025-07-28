@@ -10,19 +10,6 @@ import Kingfisher
 import SnapKit
 import Alamofire
 
-enum ShopItemSort: String {
-    case sim = "sim"
-    case date = "date"
-    case dsc = "dsc"
-    case asc = "asc"
-}
-
-enum ShopItemPrefetchConfig: Int {
-    case display = 100
-    case preloadThreshold = 30
-    case maxItemCount = 1000
-}
-
 class ShopItemsViewController: UIViewController {
 
     // MARK: - Identifier
@@ -30,12 +17,35 @@ class ShopItemsViewController: UIViewController {
     
     // MARK: - Property
     var dataTitle: String = ""
-    var data: Shop = Shop(lastBuildDate: "", total: 0, start: 0, display: 0, items: [])
+    
+    var data: Shop = Shop(lastBuildDate: "", total: 0, start: 0, display: 0, items: []) {
+        didSet {
+            configureUI()
+        }
+    }
+    
     lazy var items = data.items {
         didSet {
             collectionView.reloadData()
         }
     }
+    
+    var start = 1 {
+        didSet {
+            if start != 1 {
+                callRequest()
+            }
+        }
+    }
+    
+    var sort = ShopItemSort.sim {
+        didSet {
+            start = 1
+            collectionView.scrollToItem(at: IndexPath(row: 0, section: 0), at: .top, animated: false)
+            callRequest()
+        }
+    }
+    
     lazy var selectedButton: UIButton = sortByRelevanceButton {
         didSet {
             oldValue.isSelected = false
@@ -53,18 +63,6 @@ class ShopItemsViewController: UIViewController {
             default:
                 break
             }
-        }
-    }
-    var sort = ShopItemSort.sim {
-        didSet {
-            start = 1
-            collectionView.scrollToItem(at: IndexPath(row: 0, section: 0), at: .top, animated: false)
-            callRequest()
-        }
-    }
-    var start = 1 {
-        didSet {
-            callRequest()
         }
     }
     
@@ -252,13 +250,16 @@ extension ShopItemsViewController: SeSACViewControllerProtocol {
     
     // MARK: - Configure UI
     func configureUI() {
-        
+        configureCountLabelUI()
+    }
+    
+    private func configureCountLabelUI() {
+        countLabel.text = "\(String(data.total).toDecimalStyle()) 개의 검색 결과"
     }
     
     // MARK: - Initialize UI
     func initUI() {
         initViewUI()
-        initCountLabelUI()
     }
     
     private func initViewUI() {
@@ -269,19 +270,15 @@ extension ShopItemsViewController: SeSACViewControllerProtocol {
         collectionView.backgroundColor = .clear
     }
     
-    private func initCountLabelUI() {
-        countLabel.text = "\(String(data.total).toDecimalStyle()) 개의 검색 결과"
-    }
-    
     // MARK: - Configure
     func configure() {
         
     }
 }
 
-// MARK: - CollectionView Delegate, DataSource
+
 extension ShopItemsViewController: UICollectionViewDelegate, UICollectionViewDataSource {
-    
+    // MARK: - CollectionView Delegate, DataSource
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
         return items.count
     }
