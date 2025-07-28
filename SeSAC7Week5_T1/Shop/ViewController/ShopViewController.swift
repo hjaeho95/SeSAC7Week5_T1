@@ -10,13 +10,13 @@ import Alamofire
 import SnapKit
 import Toast
 
-class ShopViewController: UIViewController {
+final class ShopViewController: UIViewController {
     
     // MARK: - Identifier
     static let identifier = "ShopViewController"
     
     // MARK: - Property
-    var query: String = "" {
+    private var query: String = "" {
         didSet {
             NetworkManager.shared.callRequest(query: query) { data in
                 self.data = data
@@ -24,7 +24,7 @@ class ShopViewController: UIViewController {
         }
     }
     
-    var data: Shop = Shop(lastBuildDate: "", total: 0, start: 0, display: 0, items: []) {
+    private var data: Shop = Shop(lastBuildDate: "", total: 0, start: 0, display: 0, items: []) {
         didSet {
             navigateToShowItemsViewController(data)
         }

@@ -9,13 +9,13 @@ import UIKit
 import Kingfisher
 import SnapKit
 
-class ShopItemCollectionViewCell: UICollectionViewCell {
+final class ShopItemCollectionViewCell: UICollectionViewCell {
     
     // MARK: - Identifier
     static let identifier = "ShopItemCollectionViewCell"
     
     // MARK: - Property
-    var isLike = false {
+    private var isLike = false {
         didSet {
             isLike ? itemLikeButton.setImage(UIImage(systemName: "heart.fill"), for: .normal) : itemLikeButton.setImage(UIImage(systemName: "heart"), for: .normal)
             
@@ -23,7 +23,7 @@ class ShopItemCollectionViewCell: UICollectionViewCell {
     }
     
     // MARK: - Component
-    let itemImageView = {
+    private let itemImageView = {
         let imageView = UIImageView()
         imageView.backgroundColor = .white
         imageView.contentMode = .scaleAspectFill
@@ -32,7 +32,7 @@ class ShopItemCollectionViewCell: UICollectionViewCell {
         return imageView
     }()
     
-    lazy var itemLikeButton = {
+    private lazy var itemLikeButton = {
         let button = UIButton()
         button.backgroundColor = .white
         button.tintColor = .black
@@ -44,7 +44,7 @@ class ShopItemCollectionViewCell: UICollectionViewCell {
         return button
     }()
     
-    let itemMallNameLabel = {
+    private let itemMallNameLabel = {
         let label = UILabel()
         label.font = .systemFont(ofSize: 12, weight: .light)
         label.textColor = .gray
@@ -52,7 +52,7 @@ class ShopItemCollectionViewCell: UICollectionViewCell {
         return label
     }()
     
-    let itemTitleLabel = {
+    private let itemTitleLabel = {
         let label = UILabel()
         label.font = .systemFont(ofSize: 14)
         label.textColor = .white
@@ -60,7 +60,7 @@ class ShopItemCollectionViewCell: UICollectionViewCell {
         return label
     }()
     
-    let itemlpriceLabel = {
+    private let itemlpriceLabel = {
         let label = UILabel()
         label.font = .systemFont(ofSize: 16, weight: .bold)
         label.textColor = .white

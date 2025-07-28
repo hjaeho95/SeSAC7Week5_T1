@@ -1,6 +1,6 @@
 import UIKit
 
-class SeparatorUIView: UIView {
+final class SeparatorUIView: UIView {
     
     init() {
         super.init(frame: CGRect(x: 0, y: 0, width: 0, height: 1))

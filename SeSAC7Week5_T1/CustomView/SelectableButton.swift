@@ -1,6 +1,6 @@
 import UIKit
 
-class SelectableButton: UIButton {
+final class SelectableButton: UIButton {
     
     init(_ title: String) {
         super.init(frame: .zero)

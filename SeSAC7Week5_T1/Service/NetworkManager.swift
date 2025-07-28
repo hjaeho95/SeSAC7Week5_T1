@@ -21,6 +21,7 @@ class NetworkManager {
         let url = "\(url)query=\(query)&display=\(display)&sort=\(sort.rawValue)&start=\(start)"
         let headers = headers
         AF.request(url, method: .get, headers: headers)
+            .validate(statusCode: 200..<300)
             .responseDecodable(of: Shop.self) { response in
                 switch response.result {
                 case .success(let data):

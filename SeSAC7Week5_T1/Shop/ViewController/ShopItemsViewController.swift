@@ -10,7 +10,7 @@ import Kingfisher
 import SnapKit
 import Alamofire
 
-class ShopItemsViewController: UIViewController {
+final class ShopItemsViewController: UIViewController {
 
     // MARK: - Identifier
     static let identifier = "ShopItemsViewController"
@@ -24,13 +24,13 @@ class ShopItemsViewController: UIViewController {
         }
     }
     
-    lazy var items = data.items {
+    private lazy var items = data.items {
         didSet {
             collectionView.reloadData()
         }
     }
     
-    var start = 1 {
+    private var start = 1 {
         didSet {
             if start != 1 {
                 NetworkManager.shared.callRequest(query: dataTitle, sort: sort, start: start) { data in
@@ -40,7 +40,7 @@ class ShopItemsViewController: UIViewController {
         }
     }
     
-    var sort = ShopItemSort.sim {
+    private var sort = ShopItemSort.sim {
         didSet {
             start = 1
             collectionView.scrollToItem(at: IndexPath(row: 0, section: 0), at: .top, animated: false)
@@ -50,7 +50,7 @@ class ShopItemsViewController: UIViewController {
         }
     }
     
-    lazy var selectedButton: UIButton = sortByRelevanceButton {
+    private lazy var selectedButton: UIButton = sortByRelevanceButton {
         didSet {
             oldValue.isSelected = false
             selectedButton.isSelected = true
@@ -294,7 +294,6 @@ extension ShopItemsViewController: UICollectionViewDelegate, UICollectionViewDat
                 return
             }
             start = startItemCount
-            print(items.count, start)
         }
     }
 }
