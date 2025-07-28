@@ -5,8 +5,6 @@
 //  Created by ez on 7/25/25.
 //
 
-import Foundation
-
 struct Shop: Decodable {
     let lastBuildDate: String
     let total: Int

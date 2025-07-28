@@ -8,7 +8,7 @@
 import UIKit
 
 extension UIAlertController {
-    convenience init(title: String?, message: String?, handler: @escaping (UIAlertAction) -> Void) {
+    convenience init(title: String?, message: String?, handler: ((UIAlertAction) -> Void)?) {
         self.init(title: title, message: message, preferredStyle: .alert)
         
         let action = UIAlertAction(title: "확인", style: .default, handler: handler)

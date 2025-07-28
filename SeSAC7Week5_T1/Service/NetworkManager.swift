@@ -5,7 +5,6 @@
 //  Created by ez on 7/28/25.
 //
 
-import Foundation
 import Alamofire
 
 class NetworkManager {

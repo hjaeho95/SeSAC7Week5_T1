@@ -122,6 +122,7 @@ class ShopItemsViewController: UIViewController {
         activityIndicatorView.style = .medium
         activityIndicatorView.hidesWhenStopped = true
         activityIndicatorView.startAnimating()
+        activityIndicatorView.backgroundColor = .black
         return activityIndicatorView
     }()
     
@@ -133,6 +134,11 @@ class ShopItemsViewController: UIViewController {
         configureLayout()
         initUI()
         configure()
+        
+        //activityIndicatorView 테스트
+        DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+            self.activityIndicatorView.stopAnimating()
+        }
     }
     
     // MARK: - Method
@@ -217,15 +223,13 @@ extension ShopItemsViewController: SeSACViewControllerProtocol {
         collectionView.snp.makeConstraints { make in
             make.top.equalTo(sortByRelevanceButton.snp.bottom).offset(8)
             make.horizontalEdges.equalTo(view.safeAreaLayoutGuide)
-            make.bottom.equalTo(view)
+            make.bottom.equalTo(view.safeAreaLayoutGuide)
         }
     }
     
     private func configureActivityIndicatorViewLayout() {
-        collectionView.snp.makeConstraints { make in
-            make.top.equalTo(sortByRelevanceButton.snp.bottom).offset(8)
-            make.horizontalEdges.equalTo(view.safeAreaLayoutGuide)
-            make.bottom.equalTo(view)
+        activityIndicatorView.snp.makeConstraints { make in
+            make.edges.equalTo(view.safeAreaLayoutGuide)
         }
     }
     
