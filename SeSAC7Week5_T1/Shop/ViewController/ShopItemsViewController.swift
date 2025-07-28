@@ -17,6 +17,12 @@ enum ShopItemSort: String {
     case asc = "asc"
 }
 
+enum ShopItemPrefetchConfig: Int {
+    case display = 100
+    case preloadThreshold = 30
+    case maxItemCount = 1000
+}
+
 class ShopItemsViewController: UIViewController {
 
     // MARK: - Identifier
@@ -24,9 +30,9 @@ class ShopItemsViewController: UIViewController {
     
     // MARK: - Property
     var dataTitle: String = ""
-    var data: Shop = Shop(lastBuildDate: "", total: 0, start: 0, display: 0, items: []) {
+    var data: Shop = Shop(lastBuildDate: "", total: 0, start: 0, display: 0, items: [])
+    lazy var items = data.items {
         didSet {
-            print("data")
             collectionView.reloadData()
         }
     }
@@ -37,16 +43,28 @@ class ShopItemsViewController: UIViewController {
             
             switch selectedButton.tag {
             case 0:
-                callRequest(sort: ShopItemSort.sim.rawValue)
+                sort = ShopItemSort.sim
             case 1:
-                callRequest(sort: ShopItemSort.date.rawValue)
+                sort = ShopItemSort.date
             case 2:
-                callRequest(sort: ShopItemSort.dsc.rawValue)
+                sort = ShopItemSort.dsc
             case 3:
-                callRequest(sort: ShopItemSort.asc.rawValue)
+                sort = ShopItemSort.asc
             default:
                 break
             }
+        }
+    }
+    var sort = ShopItemSort.sim {
+        didSet {
+            start = 1
+            collectionView.scrollToItem(at: IndexPath(row: 0, section: 0), at: .top, animated: false)
+            callRequest()
+        }
+    }
+    var start = 1 {
+        didSet {
+            callRequest()
         }
     }
     
@@ -97,6 +115,14 @@ class ShopItemsViewController: UIViewController {
         return collectionView
     }()
     
+    private var activityIndicatorView = {
+        let activityIndicatorView = UIActivityIndicatorView()
+        activityIndicatorView.style = .medium
+        activityIndicatorView.hidesWhenStopped = true
+        activityIndicatorView.startAnimating()
+        return activityIndicatorView
+    }()
+    
     // MARK: - Life Cycle
     override func viewDidLoad() {
         super.viewDidLoad()
@@ -118,7 +144,7 @@ class ShopItemsViewController: UIViewController {
         
         let itemWidth = deviceWidth - (edgePadding * 2) - (itemSpacing * (itemRowCount - 1))
         
-        layout.itemSize = CGSize(width: itemWidth / itemRowCount, height: (itemWidth / itemRowCount) + 50)
+        layout.itemSize = CGSize(width: itemWidth / itemRowCount, height: (itemWidth / itemRowCount) + 60)
         layout.sectionInset = .init(top: edgePadding, left: edgePadding, bottom: edgePadding, right: edgePadding)
         layout.minimumLineSpacing = itemSpacing
         layout.minimumInteritemSpacing = itemSpacing
@@ -127,18 +153,23 @@ class ShopItemsViewController: UIViewController {
         return layout
     }
     
-    private func callRequest(sort: String) {
+    private func callRequest() {
         print(#function)
         let headers = HTTPHeaders([
             "X-Naver-Client-Id": "HoBtSpz61437_fassXHE",
             "X-Naver-Client-Secret": "uhRjQxAq8s"
         ])
-        let url = "https://openapi.naver.com/v1/search/shop.json?query=\(dataTitle)&display=100&sort=\(sort)"
+        let url = "https://openapi.naver.com/v1/search/shop.json?query=\(dataTitle)&display=\(ShopItemPrefetchConfig.display.rawValue)&sort=\(sort.rawValue)&start=\(start)"
         AF.request(url, method: .get, headers: headers)
             .responseDecodable(of: Shop.self) { response in
                 switch response.result {
                 case .success(let data):
-                    self.data = data
+                    if self.start == 1 {
+                        self.items = data.items
+                    } else {
+                        self.items.append(contentsOf: data.items)
+                    }
+                    
                 case .failure(let error):
                     print(error)
                 }
@@ -154,7 +185,7 @@ extension ShopItemsViewController: SeSACViewControllerProtocol {
     
     // MARK: - Configure Hierarchy
     func configuerHierarchy() {
-        view.addSubview(countLabel, sortByRelevanceButton, sortByLatestButton, sortByHighPriceButton, sortByLowPriceButton, collectionView)
+        view.addSubview(countLabel, sortByRelevanceButton, sortByLatestButton, sortByHighPriceButton, sortByLowPriceButton, collectionView, activityIndicatorView)
     }
     
     // MARK: - Configure Layout
@@ -165,6 +196,7 @@ extension ShopItemsViewController: SeSACViewControllerProtocol {
         configureSortByHighPriceButton()
         configureSortByLowPriceButton()
         configureCollectionViewLayout()
+        configureActivityIndicatorViewLayout()
     }
     
     private func configureCountLabelLayout() {
@@ -210,6 +242,14 @@ extension ShopItemsViewController: SeSACViewControllerProtocol {
         }
     }
     
+    private func configureActivityIndicatorViewLayout() {
+        collectionView.snp.makeConstraints { make in
+            make.top.equalTo(sortByRelevanceButton.snp.bottom).offset(8)
+            make.horizontalEdges.equalTo(view.safeAreaLayoutGuide)
+            make.bottom.equalTo(view)
+        }
+    }
+    
     // MARK: - Configure UI
     func configureUI() {
         
@@ -239,19 +279,40 @@ extension ShopItemsViewController: SeSACViewControllerProtocol {
     }
 }
 
+// MARK: - CollectionView Delegate, DataSource
 extension ShopItemsViewController: UICollectionViewDelegate, UICollectionViewDataSource {
+    
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return data.items.count
+        return items.count
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: ShopItemCollectionViewCell.identifier, for: indexPath) as! ShopItemCollectionViewCell
         
-        let row = data.items[indexPath.row]
+        let row = items[indexPath.row]
         
         cell.backgroundColor = .clear
         cell.configureUI(rowData: row)
         
         return cell
+    }
+    
+    func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
+        print(#function, indexPath)
+        let checkCount = indexPath.row + 1
+        let preloadThreshold = items.count - ShopItemPrefetchConfig.preloadThreshold.rawValue
+        
+        // 데이터 추가
+        if checkCount == preloadThreshold {
+            // 마지막 페이지 확인
+            let startItemCount = start + ShopItemPrefetchConfig.display.rawValue
+            let maxItemCount = ShopItemPrefetchConfig.maxItemCount.rawValue
+            if startItemCount > min(data.total, maxItemCount) {
+                print("마지막 페이지")
+                return
+            }
+            start = startItemCount
+            print(items.count, start)
+        }
     }
 }
