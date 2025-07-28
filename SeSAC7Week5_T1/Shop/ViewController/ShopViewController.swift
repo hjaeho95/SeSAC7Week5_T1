@@ -12,22 +12,20 @@ import Toast
 
 class ShopViewController: UIViewController {
     
-    // https://openapi.naver.com/v1/search/shop.json?query=
-    // X-Naver-Client-Id        HoBtSpz61437_fassXHE
-    // X-Naver-Client-Secret    uhRjQxAq8s
-    
     // MARK: - Identifier
     static let identifier = "ShopViewController"
     
     // MARK: - Property
     var query: String = "" {
         didSet {
-            callRequest()
+            NetworkManager.shared.callRequest(query: query) { data in
+                self.data = data
+            }
         }
     }
+    
     var data: Shop = Shop(lastBuildDate: "", total: 0, start: 0, display: 0, items: []) {
         didSet {
-            dump(data)
             navigateToShowItemsViewController(data)
         }
     }
@@ -69,27 +67,9 @@ class ShopViewController: UIViewController {
         configureLayout()
         initUI()
         configure()
-        callRequest()
     }
     
     // MARK: - Method
-    private func callRequest() {
-        let headers = HTTPHeaders([
-            "X-Naver-Client-Id": "HoBtSpz61437_fassXHE",
-            "X-Naver-Client-Secret": "uhRjQxAq8s"
-        ])
-        let url = "https://openapi.naver.com/v1/search/shop.json?query=\(query)&display=\(ShopItemPrefetchConfig.display.rawValue)"
-        AF.request(url, method: .get, headers: headers)
-            .responseDecodable(of: Shop.self) { response in
-                switch response.result {
-                case .success(let data):
-                    self.data = data
-                case .failure(let error):
-                    print(error)
-                }
-            }
-    }
-    
     private func navigateToShowItemsViewController(_ data: Shop) {
         let viewController = ShopItemsViewController()
         viewController.dataTitle = query

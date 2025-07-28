@@ -10,7 +10,6 @@ class SelectableButton: UIButton {
         config.cornerStyle = .large
         config.background.strokeColor = .white
         config.background.strokeWidth = 1
-//        config.background.cornerRadius = 8
         configuration = config
         
         configurationUpdateHandler = { button in

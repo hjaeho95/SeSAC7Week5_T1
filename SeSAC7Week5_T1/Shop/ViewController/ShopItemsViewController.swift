@@ -33,7 +33,9 @@ class ShopItemsViewController: UIViewController {
     var start = 1 {
         didSet {
             if start != 1 {
-                callRequest()
+                NetworkManager.shared.callRequest(query: dataTitle, sort: sort, start: start) { data in
+                    self.items.append(contentsOf: data.items)
+                }
             }
         }
     }
@@ -42,7 +44,9 @@ class ShopItemsViewController: UIViewController {
         didSet {
             start = 1
             collectionView.scrollToItem(at: IndexPath(row: 0, section: 0), at: .top, animated: false)
-            callRequest()
+            NetworkManager.shared.callRequest(query: dataTitle, sort: sort) { data in
+                self.items = data.items
+            }
         }
     }
     
@@ -149,29 +153,6 @@ class ShopItemsViewController: UIViewController {
         layout.scrollDirection = direction
         
         return layout
-    }
-    
-    private func callRequest() {
-        print(#function)
-        let headers = HTTPHeaders([
-            "X-Naver-Client-Id": "HoBtSpz61437_fassXHE",
-            "X-Naver-Client-Secret": "uhRjQxAq8s"
-        ])
-        let url = "https://openapi.naver.com/v1/search/shop.json?query=\(dataTitle)&display=\(ShopItemPrefetchConfig.display.rawValue)&sort=\(sort.rawValue)&start=\(start)"
-        AF.request(url, method: .get, headers: headers)
-            .responseDecodable(of: Shop.self) { response in
-                switch response.result {
-                case .success(let data):
-                    if self.start == 1 {
-                        self.items = data.items
-                    } else {
-                        self.items.append(contentsOf: data.items)
-                    }
-                    
-                case .failure(let error):
-                    print(error)
-                }
-            }
     }
     
     @objc private func sortByButtonTapped(sender: UIButton) {
