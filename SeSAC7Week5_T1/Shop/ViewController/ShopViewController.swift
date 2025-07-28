@@ -158,7 +158,10 @@ extension ShopViewController: UISearchBarDelegate {
     // MARK: - SearchBar Delegate
     func searchBarSearchButtonClicked(_ searchBar: UISearchBar) {
         guard let text = searchBar.text, text.count > 1 else {
-            print("입력 오류")
+            let alert = UIAlertController(title: "", message: "2글자 이상 입력해주세요!") { _ in
+                searchBar.text = ""
+            }
+            present(alert, animated: true)
             return
         }
         query = text
