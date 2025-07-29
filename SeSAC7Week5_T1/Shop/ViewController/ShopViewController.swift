@@ -124,7 +124,6 @@ extension ShopViewController: SeSACViewControllerProtocol {
     private func initViewUI() {
         view.backgroundColor = .black
         navigationItem.title = "영캠러의 쇼핑쇼핑"
-        navigationController?.navigationBar.titleTextAttributes = [.foregroundColor: UIColor.white]
         navigationItem.backButtonTitle = ""
     }
     

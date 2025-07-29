@@ -249,8 +249,6 @@ extension ShopItemsViewController: SeSACViewControllerProtocol {
     
     private func initViewUI() {
         navigationItem.title = dataTitle
-        navigationController?.navigationBar.titleTextAttributes = [.foregroundColor: UIColor.white.cgColor]
-        navigationController?.navigationBar.tintColor = .white
         view.backgroundColor = .black
         collectionView.backgroundColor = .clear
     }
