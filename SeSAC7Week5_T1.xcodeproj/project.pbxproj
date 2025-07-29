@@ -11,10 +11,12 @@
 		272390292E335696007F6742 /* SnapKit in Frameworks */ = {isa = PBXBuildFile; productRef = 272390282E335696007F6742 /* SnapKit */; };
 		2723902C2E335729007F6742 /* Kingfisher in Frameworks */ = {isa = PBXBuildFile; productRef = 2723902B2E335729007F6742 /* Kingfisher */; };
 		2723902F2E335732007F6742 /* Toast in Frameworks */ = {isa = PBXBuildFile; productRef = 2723902E2E335732007F6742 /* Toast */; };
+		272395232E389F5E007F6742 /* .gitignore in Resources */ = {isa = PBXBuildFile; fileRef = 272395222E389F5E007F6742 /* .gitignore */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
 		27238FD42E334ED5007F6742 /* SeSAC7Week5_T1.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = SeSAC7Week5_T1.app; sourceTree = BUILT_PRODUCTS_DIR; };
+		272395222E389F5E007F6742 /* .gitignore */ = {isa = PBXFileReference; lastKnownFileType = text; path = .gitignore; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFileSystemSynchronizedBuildFileExceptionSet section */
@@ -56,6 +58,7 @@
 		27238FCB2E334ED5007F6742 = {
 			isa = PBXGroup;
 			children = (
+				272395222E389F5E007F6742 /* .gitignore */,
 				27238FD62E334ED5007F6742 /* SeSAC7Week5_T1 */,
 				27238FD52E334ED5007F6742 /* Products */,
 			);
@@ -143,6 +146,7 @@
 			isa = PBXResourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
+				272395232E389F5E007F6742 /* .gitignore in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
