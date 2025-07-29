@@ -30,6 +30,12 @@ final class ShopItemsViewController: UIViewController {
         }
     }
     
+    private var recommendedItems: [ShopItem] = [] {
+        didSet {
+            recommendedCollectionView.reloadData()
+        }
+    }
+    
     private var start = 1 {
         didSet {
             if start != 1 {
@@ -114,6 +120,21 @@ final class ShopItemsViewController: UIViewController {
         collectionView.dataSource = self
         
         collectionView.register(ShopItemCollectionViewCell.self, forCellWithReuseIdentifier: ShopItemCollectionViewCell.identifier)
+        
+        collectionView.indicatorStyle = .white
+        collectionView.tag = 0
+        return collectionView
+    }()
+    
+    private lazy var recommendedCollectionView = {
+        let collectionView = UICollectionView(frame: .zero, collectionViewLayout: self.collectionViewLayout(rowCount: 3, direction: .horizontal))
+        collectionView.delegate = self
+        collectionView.dataSource = self
+        
+        collectionView.register(ShopItemCollectionViewCell.self, forCellWithReuseIdentifier: ShopItemCollectionViewCell.identifier)
+        
+        collectionView.backgroundColor = .systemMint
+        collectionView.tag = 1
         return collectionView
     }()
     
@@ -127,6 +148,8 @@ final class ShopItemsViewController: UIViewController {
     }()
     
     // MARK: - Life Cycle
+    
+    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -135,8 +158,8 @@ final class ShopItemsViewController: UIViewController {
         initUI()
         configure()
         
-        //activityIndicatorView 테스트
-        DispatchQueue.main.asyncAfter(deadline: .now() + 3) {
+        NetworkManager.shared.callRequest(query: "캠핑", view: self) { data in
+            self.recommendedItems = data.items
             self.activityIndicatorView.stopAnimating()
         }
     }
@@ -152,7 +175,7 @@ final class ShopItemsViewController: UIViewController {
         
         let itemWidth = deviceWidth - (edgePadding * 2) - (itemSpacing * (itemRowCount - 1))
         
-        layout.itemSize = CGSize(width: itemWidth / itemRowCount, height: (itemWidth / itemRowCount) + 60)
+        layout.itemSize = CGSize(width: itemWidth / itemRowCount, height: (itemWidth / itemRowCount) + 88)
         layout.sectionInset = .init(top: edgePadding, left: edgePadding, bottom: edgePadding, right: edgePadding)
         layout.minimumLineSpacing = itemSpacing
         layout.minimumInteritemSpacing = itemSpacing
@@ -170,7 +193,7 @@ extension ShopItemsViewController: SeSACViewControllerProtocol {
     
     // MARK: - Configure Hierarchy
     func configuerHierarchy() {
-        view.addSubview(countLabel, sortByRelevanceButton, sortByLatestButton, sortByHighPriceButton, sortByLowPriceButton, collectionView, activityIndicatorView)
+        view.addSubview(countLabel, sortByRelevanceButton, sortByLatestButton, sortByHighPriceButton, sortByLowPriceButton, collectionView, recommendedCollectionView, activityIndicatorView)
     }
     
     // MARK: - Configure Layout
@@ -181,6 +204,7 @@ extension ShopItemsViewController: SeSACViewControllerProtocol {
         configureSortByHighPriceButton()
         configureSortByLowPriceButton()
         configureCollectionViewLayout()
+        configureRecommendedCollectionViewLayout()
         configureActivityIndicatorViewLayout()
     }
     
@@ -223,6 +247,14 @@ extension ShopItemsViewController: SeSACViewControllerProtocol {
         collectionView.snp.makeConstraints { make in
             make.top.equalTo(sortByRelevanceButton.snp.bottom).offset(8)
             make.horizontalEdges.equalTo(view.safeAreaLayoutGuide)
+            make.bottom.equalTo(recommendedCollectionView.snp.top)
+        }
+    }
+    
+    private func configureRecommendedCollectionViewLayout() {
+        recommendedCollectionView.snp.makeConstraints { make in
+            make.height.equalTo(220)
+            make.horizontalEdges.equalTo(view.safeAreaLayoutGuide)
             make.bottom.equalTo(view.safeAreaLayoutGuide)
         }
     }
@@ -263,22 +295,40 @@ extension ShopItemsViewController: SeSACViewControllerProtocol {
 extension ShopItemsViewController: UICollectionViewDelegate, UICollectionViewDataSource {
     // MARK: - CollectionView Delegate, DataSource
     func collectionView(_ collectionView: UICollectionView, numberOfItemsInSection section: Int) -> Int {
-        return items.count
+        switch collectionView.tag {
+        case 0:
+            return items.count
+        case 1:
+            return recommendedItems.count
+        default: break
+        }
+        return 0
     }
     
     func collectionView(_ collectionView: UICollectionView, cellForItemAt indexPath: IndexPath) -> UICollectionViewCell {
+        
         let cell = collectionView.dequeueReusableCell(withReuseIdentifier: ShopItemCollectionViewCell.identifier, for: indexPath) as! ShopItemCollectionViewCell
         
-        let row = items[indexPath.row]
-        
-        cell.backgroundColor = .clear
-        cell.configureUI(rowData: row)
-        
+        switch collectionView.tag {
+        case 0:
+            let row = items[indexPath.row]
+            
+            cell.backgroundColor = .clear
+            cell.configureUI(rowData: row)
+        case 1:
+            let row = recommendedItems[indexPath.row]
+            
+            cell.backgroundColor = .clear
+            cell.configureUI(rowData: row)
+        default: break
+        }
         return cell
     }
     
     func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
         print(#function, indexPath)
+        if !(collectionView.tag == 0) { return }
+        
         let checkCount = indexPath.row + 1
         let preloadThreshold = items.count - ShopItemPrefetchConfig.preloadThreshold.rawValue
         

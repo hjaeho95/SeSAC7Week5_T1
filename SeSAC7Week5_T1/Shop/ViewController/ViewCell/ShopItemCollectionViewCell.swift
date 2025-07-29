@@ -105,7 +105,7 @@ extension ShopItemCollectionViewCell: SeSACViewCellProtocol {
     private func configureItemImageViewLayout() {
         itemImageView.snp.makeConstraints{ make in
             make.top.horizontalEdges.equalTo(contentView)
-            make.height.equalTo(150)
+            make.height.equalTo(itemImageView.snp.width)
         }
     }
     

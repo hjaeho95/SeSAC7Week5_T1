@@ -67,7 +67,6 @@ final class ShopViewController: UIViewController {
         configureLayout()
         initUI()
         configure()
-        query = "아이"
     }
     
     // MARK: - Method

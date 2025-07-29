@@ -14,8 +14,8 @@ final class NetworkManager {
     
     static let shared = NetworkManager()
     
-    let url = "https://openapi.naver.com/v1/search/shop.json?"
-    let headers = HTTPHeaders([
+    private let url = "https://openapi.naver.com/v1/search/shop.json?"
+    private let headers = HTTPHeaders([
         "X-Naver-Client-Id": APIKey.naverClientId,
         "X-Naver-Client-Secret": APIKey.naverClientSecret
     ])
@@ -29,7 +29,7 @@ final class NetworkManager {
             return
         }
         
-        let url = "\(url)qury=\(query)&display=\(display)&sort=\(sort.rawValue)&start=\(start)"
+        let url = "\(url)query=\(query)&display=\(display)&sort=\(sort.rawValue)&start=\(start)"
         let headers = headers
         AF.request(url, method: .get, headers: headers)
             .responseData { response in
@@ -39,7 +39,7 @@ final class NetworkManager {
                         if (200..<300).contains(response.statusCode) {
                             do {
                                 let result = try JSONDecoder().decode(Shop.self, from: data)
-                                print("성공: \(result)")
+                                completionHandler(result)
                             } catch {
                                 print("디코딩 실패: \(error)")
                                 let alert = UIAlertController(title: "Error", message: "디코딩 실패") { _ in }
