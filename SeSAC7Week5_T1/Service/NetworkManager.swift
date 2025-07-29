@@ -6,28 +6,63 @@
 //
 
 import Alamofire
+import UIKit
 
-class NetworkManager {
+final class NetworkManager {
+    
+    private init() { }
+    
     static let shared = NetworkManager()
     
-    var url = "https://openapi.naver.com/v1/search/shop.json?"
-    var headers = HTTPHeaders([
-        "X-Naver-Client-Id": "HoBtSpz61437_fassXHE",
-        "X-Naver-Client-Secret": "uhRjQxAq8s"
+    let url = "https://openapi.naver.com/v1/search/shop.json?"
+    let headers = HTTPHeaders([
+        "X-Naver-Client-Id": APIKey.naverClientId,
+        "X-Naver-Client-Secret": APIKey.naverClientSecret
     ])
      
-    func callRequest(query: String, display: Int = ShopItemPrefetchConfig.display.rawValue, sort: ShopItemSort = ShopItemSort.sim, start: Int = 1, handler: @escaping (Shop) -> Void) {
+    func callRequest(query: String, view: UIViewController, display: Int = ShopItemPrefetchConfig.display.rawValue, sort: ShopItemSort = ShopItemSort.sim, start: Int = 1, completionHandler: @escaping (Shop) -> Void) {
         print(#function)
-        let url = "\(url)query=\(query)&display=\(display)&sort=\(sort.rawValue)&start=\(start)"
+        
+        if !NetworkMonitor.shared.isConnected {
+            let alert = UIAlertController(title: "Error", message: "인터넷 연결 실패") { _ in }
+            view.present(alert, animated: true)
+            return
+        }
+        
+        let url = "\(url)qury=\(query)&display=\(display)&sort=\(sort.rawValue)&start=\(start)"
         let headers = headers
         AF.request(url, method: .get, headers: headers)
-            .validate(statusCode: 200..<300)
-            .responseDecodable(of: Shop.self) { response in
+            .responseData { response in
                 switch response.result {
                 case .success(let data):
-                    handler(data)
+                    if let response = response.response {
+                        if (200..<300).contains(response.statusCode) {
+                            do {
+                                let result = try JSONDecoder().decode(Shop.self, from: data)
+                                print("성공: \(result)")
+                            } catch {
+                                print("디코딩 실패: \(error)")
+                                let alert = UIAlertController(title: "Error", message: "디코딩 실패") { _ in }
+                                view.present(alert, animated: true)
+                            }
+                        } else {
+                            do {
+                                let result = try JSONDecoder().decode(NaverError.self, from: data)
+                                print("상태 코드: \(response.statusCode)")
+                                print("에러: \(result)")
+                                let alert = UIAlertController(title: "\(response.statusCode) Error", message: "\(result.errorCode): \(result.errorMessage)") { _ in }
+                                view.present(alert, animated: true)
+                            } catch {
+                                print("디코딩 실패: \(error)")
+                                let alert = UIAlertController(title: "Error", message: "디코딩 실패") { _ in }
+                                view.present(alert, animated: true)
+                            }
+                        }
+                    }
                 case .failure(let error):
-                    print(error)
+                    print("Alamofire error: \(error)")
+                    let alert = UIAlertController(title: "Error", message: "Alamofire error") { _ in }
+                    view.present(alert, animated: true)
                 }
             }
     }

@@ -30,11 +30,16 @@ struct ShopItem: Decodable {
     let category4: String
 }
 
+struct NaverError: Decodable {
+    let errorMessage: String
+    let errorCode: String
+}
+
 enum ShopItemSort: String {
-    case sim = "sim"
-    case date = "date"
-    case dsc = "dsc"
-    case asc = "asc"
+    case sim
+    case date
+    case dsc
+    case asc
 }
 
 enum ShopItemPrefetchConfig: Int {

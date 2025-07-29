@@ -33,7 +33,7 @@ final class ShopItemsViewController: UIViewController {
     private var start = 1 {
         didSet {
             if start != 1 {
-                NetworkManager.shared.callRequest(query: dataTitle, sort: sort, start: start) { data in
+                NetworkManager.shared.callRequest(query: dataTitle, view: self, sort: sort, start: start) { data in
                     self.items.append(contentsOf: data.items)
                 }
             }
@@ -44,7 +44,7 @@ final class ShopItemsViewController: UIViewController {
         didSet {
             start = 1
             collectionView.scrollToItem(at: IndexPath(row: 0, section: 0), at: .top, animated: false)
-            NetworkManager.shared.callRequest(query: dataTitle, sort: sort) { data in
+            NetworkManager.shared.callRequest(query: dataTitle, view: self, sort: sort) { data in
                 self.items = data.items
             }
         }

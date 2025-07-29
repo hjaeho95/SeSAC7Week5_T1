@@ -18,7 +18,7 @@ final class ShopViewController: UIViewController {
     // MARK: - Property
     private var query: String = "" {
         didSet {
-            NetworkManager.shared.callRequest(query: query) { data in
+            NetworkManager.shared.callRequest(query: query, view: self) { data in
                 self.data = data
             }
         }
@@ -67,6 +67,7 @@ final class ShopViewController: UIViewController {
         configureLayout()
         initUI()
         configure()
+        query = "아이"
     }
     
     // MARK: - Method
