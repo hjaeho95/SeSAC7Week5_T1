@@ -18,9 +18,7 @@ final class ShopViewController: UIViewController {
     // MARK: - Property
     private var query: String = "" {
         didSet {
-            NetworkManager.shared.callRequest(query: query, view: self) { data in
-                self.data = data
-            }
+            NetworkManager.shared.callRequest(query: query, completionHandler: requestCompletionHandler(result:), failHandler: requestFailHandler(title:message:))
         }
     }
     
@@ -35,7 +33,7 @@ final class ShopViewController: UIViewController {
         let searchBar = UISearchBar()
         searchBar.searchTextField.textColor = .white
         searchBar.searchTextField.attributedPlaceholder = NSMutableAttributedString(string: "브랜드, 상품, 프로필, 태그 등", attributes: [
-            .foregroundColor: UIColor.systemGray.cgColor,
+            .foregroundColor: UIColor.systemGray,
         ])
         searchBar.searchTextField.leftView?.tintColor = .systemGray
         
@@ -75,6 +73,15 @@ final class ShopViewController: UIViewController {
         viewController.dataTitle = query
         viewController.data = data
         navigationController?.pushViewController(viewController, animated: true)
+    }
+    
+    private func requestCompletionHandler(result: Shop) {
+        data = result
+    }
+    
+    private func requestFailHandler(title: String, message: String) {
+        let alert = UIAlertController(title: title, message: message) { _ in }
+        present(alert, animated: true)
     }
 }
 

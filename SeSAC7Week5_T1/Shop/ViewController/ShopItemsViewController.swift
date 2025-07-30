@@ -39,9 +39,9 @@ final class ShopItemsViewController: UIViewController {
     private var start = 1 {
         didSet {
             if start != 1 {
-                NetworkManager.shared.callRequest(query: dataTitle, view: self, sort: sort, start: start) { data in
+                NetworkManager.shared.callRequest(query: dataTitle, sort: sort, start: start, completionHandler: { data in
                     self.items.append(contentsOf: data.items)
-                }
+                }, failHandler: requestFailHandler(title:message:))
             }
         }
     }
@@ -50,9 +50,9 @@ final class ShopItemsViewController: UIViewController {
         didSet {
             start = 1
             collectionView.scrollToItem(at: IndexPath(row: 0, section: 0), at: .top, animated: false)
-            NetworkManager.shared.callRequest(query: dataTitle, view: self, sort: sort) { data in
+            NetworkManager.shared.callRequest(query: dataTitle, sort: sort, completionHandler: { data in
                 self.items = data.items
-            }
+            }, failHandler: requestFailHandler(title:message:))
         }
     }
     
@@ -148,8 +148,6 @@ final class ShopItemsViewController: UIViewController {
     }()
     
     // MARK: - Life Cycle
-    
-    
     override func viewDidLoad() {
         super.viewDidLoad()
         
@@ -158,10 +156,10 @@ final class ShopItemsViewController: UIViewController {
         initUI()
         configure()
         
-        NetworkManager.shared.callRequest(query: "캠핑", view: self) { data in
+        NetworkManager.shared.callRequest(query: "캠핑", completionHandler: { data in
             self.recommendedItems = data.items
             self.activityIndicatorView.stopAnimating()
-        }
+        }, failHandler: requestFailHandler(title:message:))
     }
     
     // MARK: - Method
@@ -182,6 +180,11 @@ final class ShopItemsViewController: UIViewController {
         layout.scrollDirection = direction
         
         return layout
+    }
+    
+    private func requestFailHandler(title: String, message: String) {
+        let alert = UIAlertController(title: title, message: message) { _ in }
+        present(alert, animated: true)
     }
     
     @objc private func sortByButtonTapped(sender: UIButton) {

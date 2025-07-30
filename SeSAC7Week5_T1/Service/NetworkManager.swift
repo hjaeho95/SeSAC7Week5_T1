@@ -5,8 +5,8 @@
 //  Created by ez on 7/28/25.
 //
 
+import Foundation
 import Alamofire
-import UIKit
 
 final class NetworkManager {
     
@@ -20,49 +20,43 @@ final class NetworkManager {
         "X-Naver-Client-Secret": APIKey.naverClientSecret
     ])
      
-    func callRequest(query: String, view: UIViewController, display: Int = ShopItemPrefetchConfig.display.rawValue, sort: ShopItemSort = ShopItemSort.sim, start: Int = 1, completionHandler: @escaping (Shop) -> Void) {
+    func callRequest(query: String, display: Int = ShopItemPrefetchConfig.display.rawValue, sort: ShopItemSort = ShopItemSort.sim, start: Int = 1, completionHandler: @escaping (Shop) -> Void, failHandler: @escaping (String, String) -> Void) {
         print(#function)
         
         if !NetworkMonitor.shared.isConnected {
-            let alert = UIAlertController(title: "Error", message: "인터넷 연결 실패") { _ in }
-            view.present(alert, animated: true)
+            failHandler("Error", "인터넷 연결 실패")
             return
         }
         
-        let url = "\(url)query=\(query)&display=\(display)&sort=\(sort.rawValue)&start=\(start)"
+        let url = "\(url)qery=\(query)&display=\(display)&sort=\(sort.rawValue)&start=\(start)"
         let headers = headers
         AF.request(url, method: .get, headers: headers)
             .responseData { response in
                 switch response.result {
                 case .success(let data):
-                    if let response = response.response {
-                        if (200..<300).contains(response.statusCode) {
-                            do {
-                                let result = try JSONDecoder().decode(Shop.self, from: data)
-                                completionHandler(result)
-                            } catch {
-                                print("디코딩 실패: \(error)")
-                                let alert = UIAlertController(title: "Error", message: "디코딩 실패") { _ in }
-                                view.present(alert, animated: true)
-                            }
-                        } else {
-                            do {
-                                let result = try JSONDecoder().decode(NaverError.self, from: data)
-                                print("상태 코드: \(response.statusCode)")
-                                print("에러: \(result)")
-                                let alert = UIAlertController(title: "\(response.statusCode) Error", message: "\(result.errorCode): \(result.errorMessage)") { _ in }
-                                view.present(alert, animated: true)
-                            } catch {
-                                print("디코딩 실패: \(error)")
-                                let alert = UIAlertController(title: "Error", message: "디코딩 실패") { _ in }
-                                view.present(alert, animated: true)
-                            }
+                    guard let response = response.response else { return }
+                    if (200..<300).contains(response.statusCode) {
+                        do {
+                            let result = try JSONDecoder().decode(Shop.self, from: data)
+                            completionHandler(result)
+                        } catch {
+                            print("디코딩 실패: \(error)")
+                            failHandler("Error", "디코딩 실패")
+                        }
+                    } else {
+                        do {
+                            let result = try JSONDecoder().decode(NaverError.self, from: data)
+                            print("상태 코드: \(response.statusCode)")
+                            print("에러: \(result)")
+                            failHandler("\(response.statusCode) Error", "\(result.errorCode): \(result.errorMessage)")
+                        } catch {
+                            print("디코딩 실패: \(error)")
+                            failHandler("Error", "디코딩 실패")
                         }
                     }
                 case .failure(let error):
                     print("Alamofire error: \(error)")
-                    let alert = UIAlertController(title: "Error", message: "Alamofire error") { _ in }
-                    view.present(alert, animated: true)
+                    failHandler("Error", "Alamofire error")
                 }
             }
     }
